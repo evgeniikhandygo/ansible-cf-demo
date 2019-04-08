@@ -1,0 +1,26 @@
+- name: provision stack
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  # Launch the cloudformation-example.json template.  Register the output.
+
+  tasks:
+  - name: gather date facts
+    setup:
+      filter: ansible_date_time
+  - name: launch ansible cloudformation example
+    cloudformation: 
+      # access
+      aws_access_key: xxx
+      aws_secret_key: xxx
+      security_token: xxx
+      # stack
+      stack_name: "ansible-test-stack"
+      state: "present"
+      region: "us-east-1"
+      disable_rollback: yes
+      template: "files/template.yaml"
+      template_parameters:
+        OriginImageHandlerS3BucketName: "ebsco-ansible-test-bucket-2"
+        BucketExpirationRuleStatus: "Disabled"

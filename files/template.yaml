@@ -1,0 +1,50 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: test tamplate running with ansible
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Amazon S3 configuration
+      Parameters:
+      - OriginImageHandlerS3BucketName
+      - BucketExpirationRuleStatus
+
+Parameters:
+  OriginImageHandlerS3BucketName:
+    Description: S3 bucket that will source your images.
+    Type: String
+    ConstraintDescription: Must be a valid S3 Bucket.
+    MinLength: '1'
+    MaxLength: '64'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9-.]*'
+  BucketExpirationRuleStatus:
+    Description: Bucket expiration rule status
+    Default: Disabled
+    Type: String
+    AllowedValues:
+    - Enabled
+    - Disabled
+
+Resources:
+  OriginImageHandlerS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref OriginImageHandlerS3BucketName
+      LifecycleConfiguration:
+        Rules:
+        - Id: ExpirationRule
+          Status: !Ref BucketExpirationRuleStatus
+          ExpirationInDays: 1
+
+Outputs:
+  OriginImageHandlerS3BucketName:
+    Description: Image-Handler origin S3 bucket name
+    Value: !Sub '${OriginImageHandlerS3Bucket}'
+  OriginImageHandlerS3BucketDomainName:
+    Description: Image-Handler origin S3 bucket domain name
+    Value: !GetAtt OriginImageHandlerS3Bucket.DomainName
+  OriginImageHandlerS3BucketUrl:
+    Description: Image-Handler origin S3 bucket URL
+    Value: !Join ['', ['https://', !GetAtt OriginImageHandlerS3Bucket.DomainName]]
